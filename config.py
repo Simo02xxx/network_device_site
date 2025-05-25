@@ -1,5 +1,8 @@
 import os
 
-SECRET_KEY = 'devsecretkey1234567890'
-SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:simokar123@localhost/network_site'
-SQLALCHEMY_TRACK_MODIFICATIONS = False
+# Configuration Flask
+class Config:
+    # En prod, Railway injectera DATABASE_URL
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "postgresql://postgres:simokar123@localhost/network_site")
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECRET_KEY = os.environ.get("SECRET_KEY", "dev_secret_key")
