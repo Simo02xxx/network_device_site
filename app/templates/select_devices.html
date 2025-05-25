@@ -1,44 +1,39 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <title>Sélection de périphériques</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100">
-<div class="max-w-5xl mx-auto mt-10 p-6 bg-white rounded shadow">
-    <h2 class="text-3xl font-bold mb-6 text-gray-800">Choisir des périphériques réseau</h2>
-    <form method="POST" class="space-y-6">
-        {{ form.csrf_token }}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<body class="bg-gradient-to-br from-blue-100 to-white min-h-screen text-gray-800">
+    <div class="max-w-6xl mx-auto py-12 px-6">
+        <h1 class="text-3xl font-bold mb-8 text-center">🛠️ Choisissez vos périphériques réseau</h1>
+
+        <form method="POST" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {{ form.csrf_token }}
             {% for device in devices %}
-            <div class="border rounded p-4 shadow-sm bg-gray-50">
-                <label class="block mb-2 font-semibold text-gray-700">{{ device.name }}</label>
-                <input
-                    type="number"
-                    name="quantity_{{ device.id }}"
-                    min="0"
-                    value="0"
-                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-            </div>
+                <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
+                    <h3 class="text-lg font-semibold mb-2 text-gray-700">{{ device.name }}</h3>
+                    <label for="quantity_{{ device.id }}" class="block text-sm text-gray-600 mb-1">Quantité :</label>
+                    <input type="number"
+                           name="quantity_{{ device.id }}"
+                           id="quantity_{{ device.id }}"
+                           class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                           min="0"
+                           value="0">
+                </div>
             {% endfor %}
-        </div>
-        <div class="flex space-x-4 mt-6">
-            <button
-                type="submit"
-                class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-semibold transition"
-            >
-                Valider la sélection
-            </button>
-            <a
-                href="{{ url_for('main.dashboard') }}"
-                class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded font-semibold transition"
-            >
-                Retour au tableau de bord
-            </a>
-        </div>
-    </form>
-</div>
+            <div class="md:col-span-2 lg:col-span-3 text-center mt-6 space-x-4">
+                <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow transition">
+                    ✅ Valider la sélection
+                </button>
+                <a href="{{ url_for('main.dashboard') }}"
+                   class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg shadow transition">
+                    🔙 Retour au tableau de bord
+                </a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

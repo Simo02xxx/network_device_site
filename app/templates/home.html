@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Accueil - RéseauPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-white text-gray-800 min-h-screen">
+    <!-- Barre de navigation -->
+    <header class="bg-white shadow sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-700">🌐 RéseauPro</h1>
+            <div class="space-x-4">
+                <a href="{{ url_for('main.login') }}" class="text-blue-600 font-medium hover:underline">Se connecter</a>
+                <a href="{{ url_for('main.register') }}" class="text-white bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 shadow">
+                    Créer un compte
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <main class="max-w-6xl mx-auto px-6 py-16 text-center">
+        <h2 class="text-4xl font-bold mb-4">Bienvenue sur <span class="text-blue-600">RéseauPro</span></h2>
+        <p class="text-lg text-gray-600 mb-8">Gérez et choisissez vos ressources réseau en toute simplicité.</p>
+        <a href="{{ url_for('main.login') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 transition">
+            Commencer maintenant
+        </a>
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="text-center text-gray-500 mt-16 pb-6">
+        © {{ current_year }} RéseauPro - Tous droits réservés.
+    </footer>
+</body>
+</html>

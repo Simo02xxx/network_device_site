@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
+from datetime import datetime
 
 from .models import User, Device, DeviceSelection
 from .forms import CSRFOnlyForm, RegisterForm, LoginForm
@@ -12,25 +13,40 @@ main = Blueprint('main', __name__)
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
+# ======================
+# PAGE D’ACCUEIL
+# ======================
 @main.route('/')
 def home():
-    return redirect(url_for('main.login'))
+    return render_template('home.html', current_year=datetime.utcnow().year)
 
+
+# ======================
+# INSCRIPTION
+# ======================
 @main.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        if User.query.filter_by(email=form.email.data).first():
+        existing_user = User.query.filter_by(email=form.email.data).first()
+        if existing_user:
             flash("Email déjà utilisé", "danger")
             return redirect(url_for('main.register'))
+
         hashed_password = generate_password_hash(form.password.data)
         new_user = User(name=form.name.data, email=form.email.data, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         flash("Inscription réussie !", "success")
         return redirect(url_for('main.login'))
+
     return render_template('register.html', form=form)
 
+
+# ======================
+# CONNEXION
+# ======================
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -44,6 +60,10 @@ def login():
             flash("Identifiants incorrects", "danger")
     return render_template('login.html', form=form)
 
+
+# ======================
+# DÉCONNEXION
+# ======================
 @main.route('/logout')
 @login_required
 def logout():
@@ -51,18 +71,21 @@ def logout():
     flash("Déconnexion réussie", "info")
     return redirect(url_for('main.login'))
 
+
+# ======================
+# TABLEAU DE BORD
+# ======================
 @main.route('/dashboard')
 @login_required
 def dashboard():
-    from .models import DeviceSelection
-
     selections = DeviceSelection.query.filter_by(user_id=current_user.id).all()
-
-    # Calcul du total
     total = sum(selection.quantity for selection in selections)
-
     return render_template('dashboard.html', user=current_user, selections=selections, total=total)
 
+
+# ======================
+# SÉLECTION DE PÉRIPHÉRIQUES
+# ======================
 @main.route('/select_devices', methods=['GET', 'POST'])
 @login_required
 def select_devices():
@@ -83,11 +106,13 @@ def select_devices():
                     )
                     db.session.add(selection)
                     added_any = True
+
         if added_any:
             db.session.commit()
             flash("Périphériques ajoutés avec succès", "success")
         else:
             flash("Aucun périphérique sélectionné.", "warning")
+
         return redirect(url_for('main.dashboard'))
 
     return render_template('select_devices.html', devices=devices, form=form)

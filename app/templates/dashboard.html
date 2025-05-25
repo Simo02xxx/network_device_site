@@ -5,46 +5,49 @@
     <title>Tableau de bord</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded shadow">
-        <h1 class="text-3xl font-bold mb-6 text-gray-800">Bonjour, {{ user.name }}</h1>
+<body class="bg-gradient-to-br from-gray-100 to-blue-100 min-h-screen text-gray-800">
+    <div class="max-w-5xl mx-auto mt-12 p-6 bg-white shadow-xl rounded-xl animate-fade-in">
+        <h1 class="text-3xl font-bold text-center mb-6">👋 Bonjour, {{ user.name }}</h1>
 
-        <h2 class="text-xl font-semibold mb-4">Vos périphériques sélectionnés</h2>
+        <h2 class="text-xl font-semibold mb-4 text-gray-700">🧩 Vos périphériques sélectionnés</h2>
 
         {% if selections %}
-        <table class="min-w-full table-auto border-collapse border border-gray-300">
-            <thead>
-                <tr class="bg-gray-200 text-gray-700">
-                    <th class="border px-4 py-2 text-left">Type de périphérique</th>
-                    <th class="border px-4 py-2 text-left">Quantité</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in selections %}
-                <tr class="bg-white hover:bg-gray-50">
-                    <td class="border px-4 py-2">{{ item.device_type }}</td>
-                    <td class="border px-4 py-2">{{ item.quantity }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <div class="mt-4 p-3 bg-blue-100 text-blue-800 rounded font-semibold">
-            Total de périphériques : {{ total }}
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
+                <thead class="bg-gray-200 text-gray-700">
+                    <tr>
+                        <th class="px-4 py-3 border">Type de périphérique</th>
+                        <th class="px-4 py-3 border">Quantité</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in selections %}
+                    <tr class="hover:bg-gray-100 transition">
+                        <td class="px-4 py-3 border">{{ item.device_type }}</td>
+                        <td class="px-4 py-3 border">{{ item.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
+        <div class="mt-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded">
+            <p><strong>Total de périphériques :</strong> {{ total }}</p>
+        </div>
         {% else %}
-        <div class="mt-4 p-3 bg-yellow-100 text-yellow-800 rounded font-semibold">
-            Aucun périphérique sélectionné.
+        <div class="mt-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded">
+            Aucun périphérique sélectionné pour le moment.
         </div>
         {% endif %}
 
-        <div class="mt-6 space-x-4">
-            <a href="{{ url_for('main.select_devices') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded">
-                Ajouter des périphériques
+        <div class="mt-6 flex flex-col sm:flex-row justify-center gap-4">
+            <a href="{{ url_for('main.select_devices') }}"
+               class="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-lg shadow transition duration-300 text-center">
+               ➕ Ajouter des périphériques
             </a>
-            <a href="{{ url_for('main.logout') }}" class="inline-block bg-gray-600 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded">
-                Se déconnecter
+            <a href="{{ url_for('main.logout') }}"
+               class="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded-lg shadow transition duration-300 text-center">
+               🚪 Se déconnecter
             </a>
         </div>
     </div>
