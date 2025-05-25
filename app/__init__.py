@@ -19,4 +19,6 @@ def create_app():
     from .routes import main
     app.register_blueprint(main)
 
+    print("Base connectée :", app.config['SQLALCHEMY_DATABASE_URI'])
+
     return app
