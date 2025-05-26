@@ -79,7 +79,7 @@ def logout():
 @login_required
 def dashboard():
     selections = DeviceSelection.query.filter_by(user_id=current_user.id).all()
-    total = sum(selection.quantity for selection in selections)
+    total = sum(selection.quantity * selection.device.price for selection in selections)
     return render_template('dashboard.html', user=current_user, selections=selections, total=total)
 
 
@@ -99,12 +99,17 @@ def select_devices():
             if qty_str and qty_str.isdigit():
                 qty = int(qty_str)
                 if qty > 0:
-                    selection = DeviceSelection(
-                        device_type=device.name,
-                        quantity=qty,
-                        user_id=current_user.id
-                    )
-                    db.session.add(selection)
+                    # Chercher si une sélection existe déjà pour cet utilisateur + device
+                    selection = DeviceSelection.query.filter_by(user_id=current_user.id, device_id=device.id).first()
+                    if selection:
+                        selection.quantity += qty
+                    else:
+                        selection = DeviceSelection(
+                            device_id=device.id,
+                            quantity=qty,
+                            user_id=current_user.id
+                        )
+                        db.session.add(selection)
                     added_any = True
 
         if added_any:
@@ -116,3 +121,4 @@ def select_devices():
         return redirect(url_for('main.dashboard'))
 
     return render_template('select_devices.html', devices=devices, form=form)
+
