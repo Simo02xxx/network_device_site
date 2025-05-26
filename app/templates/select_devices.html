@@ -13,7 +13,8 @@
             {{ form.csrf_token }}
             {% for device in devices %}
                 <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
-                    <h3 class="text-lg font-semibold mb-2 text-gray-700">{{ device.name }}</h3>
+                    <h3 class="text-lg font-semibold mb-1 text-gray-700">{{ device.name }}</h3>
+                    <p class="text-sm text-gray-500 mb-3">Prix unitaire : {{ device.price }} €</p>
                     <label for="quantity_{{ device.id }}" class="block text-sm text-gray-600 mb-1">Quantité :</label>
                     <input type="number"
                            name="quantity_{{ device.id }}"
