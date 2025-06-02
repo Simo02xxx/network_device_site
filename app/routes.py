@@ -122,3 +122,26 @@ def select_devices():
 
     return render_template('select_devices.html', devices=devices, form=form)
 
+from flask import make_response
+from io import BytesIO
+from xhtml2pdf import pisa
+
+@main.route('/telecharger_facture')
+@login_required
+def telecharger_facture():
+    selections = DeviceSelection.query.filter_by(user_id=current_user.id).all()
+    total = sum(sel.quantity * sel.device.price for sel in selections)
+    
+    html = render_template('facture.html', user=current_user, selections=selections, total=total, date=datetime.utcnow())
+    
+    pdf_file = BytesIO()
+    pisa_status = pisa.CreatePDF(html, dest=pdf_file)
+
+    if pisa_status.err:
+        return "Erreur lors de la génération du PDF", 500
+
+    pdf_file.seek(0)
+    response = make_response(pdf_file.read())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'attachment; filename=facture.pdf'
+    return response

@@ -44,7 +44,7 @@
         </div>
         {% endif %}
 
-        <div class="mt-6 flex flex-col sm:flex-row justify-center gap-4">
+        <div class="mt-6 flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
             <a href="{{ url_for('main.select_devices') }}"
                class="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-lg shadow transition duration-300 text-center">
                ➕ Ajouter des périphériques
@@ -52,6 +52,10 @@
             <a href="{{ url_for('main.logout') }}"
                class="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded-lg shadow transition duration-300 text-center">
                🚪 Se déconnecter
+            </a>
+            <a href="{{ url_for('main.telecharger_facture') }}"
+               class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow transition duration-300 text-center">
+               📄 Télécharger la facture PDF
             </a>
         </div>
     </div>

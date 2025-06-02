@@ -7,12 +7,13 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(512), nullable=False)
 
+    # Relation vers les sélections de périphériques
     devices = db.relationship('DeviceSelection', backref='user', lazy=True)
 
 class Device(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)  # ex: 'Switch', 'Hub', 'PC', 'Server', etc.
-    price = db.Column(db.Float, nullable=False)       # prix unitaire du périphérique
+    name = db.Column(db.String(100), nullable=False)  # ex: 'Switch', 'Hub', etc.
+    price = db.Column(db.Float, nullable=False)       # prix unitaire
 
     selections = db.relationship('DeviceSelection', backref='device', lazy=True)
 

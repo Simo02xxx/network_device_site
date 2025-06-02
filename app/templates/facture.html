@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Facture</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>Facture</h1>
+    <p><strong>Nom :</strong> {{ user.name }}</p>
+    <p><strong>Email :</strong> {{ user.email }}</p>
+    <p><strong>Date :</strong> {{ date.strftime('%d/%m/%Y') }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Périphérique</th>
+                <th>Quantité</th>
+                <th>Prix unitaire (€)</th>
+                <th>Total (€)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in selections %}
+            <tr>
+                <td>{{ s.device.name }}</td>
+                <td>{{ s.quantity }}</td>
+                <td>{{ s.device.price }}</td>
+                <td>{{ s.quantity * s.device.price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Total général : {{ total }} €</h3>
+</body>
+</html>
