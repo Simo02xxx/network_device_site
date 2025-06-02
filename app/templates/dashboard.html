@@ -18,13 +18,17 @@
                     <tr>
                         <th class="px-4 py-3 border">Type de périphérique</th>
                         <th class="px-4 py-3 border">Quantité</th>
+                        <th class="px-4 py-3 border">Prix unitaire (€)</th>
+                        <th class="px-4 py-3 border">Total (€)</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in selections %}
                     <tr class="hover:bg-gray-100 transition">
-                        <td class="px-4 py-3 border">{{ item.device_type }}</td>
+                        <td class="px-4 py-3 border">{{ item.device.name }}</td>
                         <td class="px-4 py-3 border">{{ item.quantity }}</td>
+                        <td class="px-4 py-3 border">{{ '%.2f'|format(item.device.price) }}</td>
+                        <td class="px-4 py-3 border">{{ '%.2f'|format(item.quantity * item.device.price) }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -32,7 +36,7 @@
         </div>
 
         <div class="mt-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded">
-            <p><strong>Total de périphériques :</strong> {{ total }}</p>
+            <p><strong>Total général :</strong> {{ '%.2f'|format(total) }} €</p>
         </div>
         {% else %}
         <div class="mt-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded">

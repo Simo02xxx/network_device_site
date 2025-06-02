@@ -9,12 +9,15 @@ class User(db.Model, UserMixin):
 
     devices = db.relationship('DeviceSelection', backref='user', lazy=True)
 
-class DeviceSelection(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    device_type = db.Column(db.String(50), nullable=False)
-    quantity = db.Column(db.Integer, default=1)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
 class Device(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)  # ex: 'Switch', 'Hub', 'PC', 'Server', etc.
+    price = db.Column(db.Float, nullable=False)       # prix unitaire du périphérique
+
+    selections = db.relationship('DeviceSelection', backref='device', lazy=True)
+
+class DeviceSelection(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    device_id = db.Column(db.Integer, db.ForeignKey('device.id'), nullable=False)
+    quantity = db.Column(db.Integer, default=1)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
