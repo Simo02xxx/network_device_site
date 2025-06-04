@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Réinitialiser le mot de passe</h2>
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    {{ form.password.label }} {{ form.password() }}<br>
+    {{ form.confirm_password.label }} {{ form.confirm_password() }}<br>
+    {{ form.submit() }}
+</form>
+{% endblock %}

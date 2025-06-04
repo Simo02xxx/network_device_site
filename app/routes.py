@@ -4,8 +4,10 @@ from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
 
 from .models import User, Device, DeviceSelection
-from .forms import CSRFOnlyForm, RegisterForm, LoginForm
-from . import db, login_manager
+from .forms import CSRFOnlyForm, RegisterForm, LoginForm, ResetPasswordRequestForm, ResetPasswordForm
+from . import db, login_manager, mail
+from flask_mail import Message
+
 
 main = Blueprint('main', __name__)
 
@@ -79,8 +81,22 @@ def logout():
 @login_required
 def dashboard():
     selections = DeviceSelection.query.filter_by(user_id=current_user.id).all()
-    total = sum(selection.quantity * selection.device.price for selection in selections)
-    return render_template('dashboard.html', user=current_user, selections=selections, total=total)
+    total = sum(item.quantity * item.device.price for item in selections)
+    form = CSRFOnlyForm()
+    return render_template('dashboard.html', user=current_user, selections=selections, total=total, form=form, current_year=2025)
+
+@main.route('/delete_device/<int:selection_id>', methods=['POST'])
+@login_required
+def delete_device(selection_id):
+    selection = DeviceSelection.query.get_or_404(selection_id)
+    if selection.user_id != current_user.id:
+        flash("Action non autorisée.", "danger")
+        return redirect(url_for('main.dashboard'))
+
+    db.session.delete(selection)
+    db.session.commit()
+    flash("Périphérique supprimé avec succès.", "success")
+    return redirect(url_for('main.dashboard'))
 
 
 # ======================
@@ -145,3 +161,45 @@ def telecharger_facture():
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = 'attachment; filename=facture.pdf'
     return response
+
+@main.route('/reset_password', methods=['GET', 'POST'])
+def reset_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
+    form = ResetPasswordRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            send_reset_email(user)
+        flash('Si cet email est enregistré, un lien de réinitialisation a été envoyé.', 'info')
+        return redirect(url_for('main.login'))
+    return render_template('reset_request.html', form=form)
+
+def send_reset_email(user):
+    token = user.get_reset_token()
+    msg = Message('Réinitialisation du mot de passe',
+                  sender='noreply@demo.com',
+                  recipients=[user.email])
+    link = url_for('main.reset_token', token=token, _external=True)
+    msg.body = f'''Pour réinitialiser votre mot de passe, cliquez sur ce lien :
+{link}
+
+Si vous n'avez pas demandé cette réinitialisation, ignorez ce mail.
+'''
+    mail.send(msg)
+
+@main.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_token(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
+    user = User.verify_reset_token(token)
+    if not user:
+        flash('Lien invalide ou expiré', 'warning')
+        return redirect(url_for('main.reset_request'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.password = generate_password_hash(form.password.data)
+        db.session.commit()
+        flash('Mot de passe réinitialisé avec succès !', 'success')
+        return redirect(url_for('main.login'))
+    return render_template('reset_token.html', form=form)

@@ -3,48 +3,92 @@
 <head>
     <meta charset="UTF-8" />
     <title>Tableau de bord</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-gray-100 to-blue-100 min-h-screen text-gray-800">
-    <div class="max-w-5xl mx-auto mt-12 p-6 bg-white shadow-xl rounded-xl animate-fade-in">
-        <h1 class="text-3xl font-bold text-center mb-6">👋 Bonjour, {{ user.name }}</h1>
+<body class="bg-gradient-to-br from-blue-50 to-white min-h-screen text-gray-800">
+
+    <!-- Barre de logo/navigation -->
+    <header class="bg-white shadow-sm py-4">
+        <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-blue-700">🌐 Mon Réseau Pro</div>
+            <div class="text-sm text-gray-600">Bienvenue, <span class="font-semibold">{{ user.name }}</span></div>
+        </div>
+    </header>
+
+    <!-- Messages flash -->
+    <div class="max-w-5xl mx-auto mt-6 px-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="mb-4 p-4 rounded
+                {% if category == 'success' %}
+                  bg-green-100 text-green-700 border border-green-400
+                {% elif category == 'danger' %}
+                  bg-red-100 text-red-700 border border-red-400
+                {% else %}
+                  bg-gray-100 text-gray-700 border border-gray-300
+                {% endif %}
+              ">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Contenu principal -->
+    <main class="max-w-5xl mx-auto mt-4 p-6 bg-white shadow-xl rounded-2xl animate-fade-in">
+        <h1 class="text-3xl font-extrabold text-center mb-6 text-gray-800">📊 Tableau de bord</h1>
 
         <h2 class="text-xl font-semibold mb-4 text-gray-700">🧩 Vos périphériques sélectionnés</h2>
 
         {% if selections %}
         <div class="overflow-x-auto">
             <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
-                <thead class="bg-gray-200 text-gray-700">
+                <thead class="bg-gray-200 text-gray-700 text-sm">
                     <tr>
                         <th class="px-4 py-3 border">Type de périphérique</th>
                         <th class="px-4 py-3 border">Quantité</th>
                         <th class="px-4 py-3 border">Prix unitaire (€)</th>
                         <th class="px-4 py-3 border">Total (€)</th>
+                        <th class="px-4 py-3 border">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in selections %}
-                    <tr class="hover:bg-gray-100 transition">
+                    <tr class="hover:bg-gray-50 transition">
                         <td class="px-4 py-3 border">{{ item.device.name }}</td>
                         <td class="px-4 py-3 border">{{ item.quantity }}</td>
                         <td class="px-4 py-3 border">{{ '%.2f'|format(item.device.price) }}</td>
                         <td class="px-4 py-3 border">{{ '%.2f'|format(item.quantity * item.device.price) }}</td>
+                        <td class="px-4 py-3 border text-center">
+                            <form method="POST" action="{{ url_for('main.delete_device', selection_id=item.id) }}">
+                                {{ form.csrf_token }}
+                                <button type="submit" 
+                                    class="text-red-600 hover:underline font-semibold"
+                                    onclick="return confirm('Voulez-vous vraiment supprimer ce périphérique ?');">
+                                    ❌ Supprimer
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <div class="mt-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded">
-            <p><strong>Total général :</strong> {{ '%.2f'|format(total) }} €</p>
+        <div class="mt-4 bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded">
+            <p class="text-lg font-medium">💰 <strong>Total général :</strong> {{ '%.2f'|format(total) }} €</p>
         </div>
         {% else %}
-        <div class="mt-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded">
-            Aucun périphérique sélectionné pour le moment.
+        <div class="mt-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded">
+            ⚠️ Aucun périphérique sélectionné pour le moment.
         </div>
         {% endif %}
 
-        <div class="mt-6 flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
+        <!-- Actions -->
+        <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
             <a href="{{ url_for('main.select_devices') }}"
                class="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-lg shadow transition duration-300 text-center">
                ➕ Ajouter des périphériques
@@ -58,6 +102,11 @@
                📄 Télécharger la facture PDF
             </a>
         </div>
-    </div>
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="text-center text-sm text-gray-500 mt-10 mb-4">
+        &copy; {{ current_year }} Mon Réseau Pro — Tous droits réservés.
+    </footer>
 </body>
 </html>
