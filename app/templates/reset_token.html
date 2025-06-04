@@ -1,10 +1,47 @@
 {% extends "base.html" %}
+{% block title %}Réinitialisation du mot de passe{% endblock %}
+
 {% block content %}
-<h2>Réinitialiser le mot de passe</h2>
-<form method="POST" action="">
-    {{ form.hidden_tag() }}
-    {{ form.password.label }} {{ form.password() }}<br>
-    {{ form.confirm_password.label }} {{ form.confirm_password() }}<br>
-    {{ form.submit() }}
-</form>
+<div class="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-50 to-white px-4">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 animate-fade-in">
+
+        <h1 class="text-2xl font-extrabold text-center text-gray-800 mb-4">🔑 Réinitialiser le mot de passe</h1>
+        <p class="text-sm text-center text-gray-600 mb-6">
+            Veuillez entrer un nouveau mot de passe ci-dessous.
+        </p>
+
+        <!-- Affichage des messages flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4 text-sm text-{{ 'green' if category == 'success' else 'red' }}-600 bg-{{ 'green' if category == 'success' else 'red' }}-100 border-l-4 border-{{ 'green' if category == 'success' else 'red' }}-500 p-3 rounded">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="space-y-5">
+            {{ form.hidden_tag() }}
+
+            <div>
+                {{ form.password.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.password(class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500") }}
+            </div>
+
+            <div>
+                {{ form.confirm_password.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.confirm_password(class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500") }}
+            </div>
+
+            <div>
+                {{ form.submit(class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300") }}
+            </div>
+        </form>
+
+        <p class="mt-6 text-sm text-center text-gray-600">
+            <a href="{{ url_for('main.login') }}" class="text-blue-600 hover:underline">← Retour à la connexion</a>
+        </p>
+    </div>
+</div>
 {% endblock %}
