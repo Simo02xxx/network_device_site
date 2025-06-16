@@ -1,6 +1,7 @@
 from flask_mail import Message
 from flask import url_for
-from . import mail
+from app import mail
+import random
 
 def send_reset_email(user):
     token = user.get_reset_token()
@@ -22,3 +23,6 @@ Cordialement,
 L'équipe de support
 '''
     mail.send(msg)
+
+def generate_otp():
+    return str(random.randint(100000, 999999))

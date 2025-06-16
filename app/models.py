@@ -8,7 +8,8 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), unique=True, index=True, nullable=False)
     password = db.Column(db.String(512), nullable=False)
-
+    otp_code = db.Column(db.String(6))
+    otp_expiration = db.Column(db.DateTime)
     # Relation vers les sélections de périphériques
     devices = db.relationship('DeviceSelection', backref='user', lazy=True)
 
@@ -32,7 +33,9 @@ class Device(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)  # ex: 'Switch', 'Hub', etc.
     price = db.Column(db.Float, nullable=False)       # prix unitaire
-
+    icon = db.Column(db.String(50)) 
+    description = db.Column(db.Text)
+    
     selections = db.relationship('DeviceSelection', backref='device', lazy=True)
 
     def __repr__(self):

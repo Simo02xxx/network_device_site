@@ -1,12 +1,12 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, logout_user, login_required, current_user
-from datetime import datetime
-
-from .models import User, Device, DeviceSelection
-from .forms import CSRFOnlyForm, RegisterForm, LoginForm, ResetPasswordRequestForm, ResetPasswordForm
-from . import db, login_manager, mail
-from flask_mail import Message
+from flask_login  import login_user, logout_user, login_required, current_user
+from datetime     import datetime, timedelta
+from .models      import User, Device, DeviceSelection
+from .forms       import CSRFOnlyForm, RegisterForm, LoginForm, ResetPasswordRequestForm, ResetPasswordForm
+from .            import db, login_manager, mail
+from flask_mail   import Message
+from .mail_utils  import generate_otp, send_reset_email
 
 
 main = Blueprint('main', __name__)
@@ -55,13 +55,23 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and check_password_hash(user.password, form.password.data):
-            login_user(user)
-            flash("Connexion réussie", "success")
-            return redirect(url_for('main.dashboard'))
-        else:
-            flash("Identifiants incorrects", "danger")
-    return render_template('login.html', form=form)
 
+            # 1) Générer un OTP
+            otp = generate_otp()
+            user.otp_code        = otp
+            user.otp_expiration  = datetime.utcnow() + timedelta(minutes=5)
+            db.session.commit()
+
+            # 2) Envoyer l’e-mail (→ nouvelle fonction juste après)
+            send_otp_email(user, otp)                       # NEW/EDIT ✓
+
+            # 3) Stocker l’id pour la vérification
+            session['user_id_otp'] = user.id
+            flash("Un code de vérification a été envoyé par email.", "info")
+            return redirect(url_for('main.verify_otp'))
+
+        flash("Identifiants incorrects", "danger")
+    return render_template('login.html', form=form)
 
 # ======================
 # DÉCONNEXION
@@ -203,3 +213,49 @@ def reset_token(token):
         flash('Mot de passe réinitialisé avec succès !', 'success')
         return redirect(url_for('main.login'))
     return render_template('reset_token.html', form=form)
+
+
+@main.route('/verify_otp', methods=['GET', 'POST'])
+def verify_otp():
+    user_id = session.get('user_id_otp')
+    if not user_id:
+        flash("Veuillez vous connecter d'abord.", "warning")
+        return redirect(url_for('main.login'))
+    
+    user = User.query.get(user_id)
+    if not user:
+        flash("Utilisateur introuvable.", "danger")
+        return redirect(url_for('main.login'))
+
+    if request.method == 'POST':
+        otp_input = request.form.get('otp')
+        if user.otp_code == otp_input and datetime.utcnow() < user.otp_expiration:
+            login_user(user)
+            # Nettoyage
+            user.otp_code = None
+            user.otp_expiration = None
+            db.session.commit()
+            session.pop('user_id_otp', None)
+            flash("Connexion réussie avec authentification à deux facteurs !", "success")
+            return redirect(url_for('main.dashboard'))
+        else:
+            flash("Code invalide ou expiré", "danger")
+
+    return render_template('verify_otp.html')
+
+def send_otp_email(user, otp):                              # signature EDIT ✓
+    """Envoie le code OTP à l’utilisateur."""
+    msg = Message(
+        subject = 'Votre code de vérification',
+        sender   = 'noreply@demo.com',
+        recipients=[user.email])
+    msg.body = f"""Bonjour {user.name},
+
+Voici votre code de vérification : {otp}
+(Validité : 5 minutes)
+
+Si vous n'êtes pas à l'origine de cette demande, ignorez ce message.
+"""
+    mail.send(msg)
+
+# (Gardez send_reset_email dans mail_utils.py OU dans routes, mais **pas en double**)
